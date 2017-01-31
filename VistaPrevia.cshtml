@@ -1,0 +1,504 @@
+﻿
+@{
+    ViewBag.Title = "VistaPrevia";
+    Layout = "~/Views/Shared/_LayoutMisCuentasHorizontalPMS.cshtml";
+}
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "__AjaxAntiForgeryForm" }))
+{
+    @Html.AntiForgeryToken()
+}
+
+<div class="container">
+    <form class="form-horizontal">
+        <div id="htmlOutput">
+            <div class="icon6-wrapper">
+                @* <i class="icon-refresh icon-spin icon-6"></i>*@
+                <img class="center" src="~/Images/loadingSatTransparent.gif" />
+            </div>
+        </div>
+        <div class="headerbtnFinal">
+            <a id="btnPresentarDeclaracion" class="btn btn-primary icon">Presentar declaracion</a>
+            <a id="btnGuardar" class="btn-guardar-das btn btn-primary icon">Guardar</a>
+            @*<a id="btnEnviarDeclara" class="btn btn-primary icon">Enviar</a>*@
+            @if (DateTime.Parse(Sat.DyP.Herramientas.Configuracion.ConfiguracionApp.AdaptadorCloud.RecuperarString("HabilitarEnvioDeclaracion")) < DateTime.Now)
+            {
+                <a id="btnEnviarDeclara" class="btn btn-primary icon">Enviar</a>
+            }
+        </div>
+
+    </form>
+</div>
+<div id="modal-ayuda" class="modal fade" backdrop="static" keyboard="false" style="z-index: 9999">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+            </div>
+            <div class="modal-footer">
+                <div class="notify">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">
+                        Aceptar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div id="DVPLANFOR" class="sat-div-contenedores hide">-</div>
+<div id="DVDAPREFOR" class="sat-div-contenedores hide">-</div>
+<div id="DVDAPREFORCOMP" class="sat-div-contenedores hide">-</div>
+<div id="DVOPER" class="sat-div-contenedores hide">-</div>
+<div id="DVDECLARACIONDISCO" class="sat-div-contenedores hide">-</div>
+<div id="DVDECLARACION" class="sat-div-contenedores hide">-</div>
+<div id="DVINFOCON" class="sat-div-contenedores hide">-</div>
+<div id="DVINFOALERTCLIENT" class="sat-div-contenedores hide">-</div>
+<div id="DVINFOALERTCLIENTORIGIN" class="sat-div-contenedores hide">-</div>
+<div id="DVCA07" class="sat-div-contenedores hide">-</div>
+<div id="DVCA08" class="sat-div-contenedores hide">-</div>
+<div id="DVRETENCIONES" class="sat-div-contenedores hide">-</div>
+<div id="DVINITRETENCIONES" class="sat-div-contenedores hide">-</div>
+<div id="DVINFODECLA" clasS="sat-div-contenedores hide">-</div>
+<div id="templateCuadroDialogoModal">
+    <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog" style="width: 800px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <h4 id="lblTituloCuadroDialogo" class="modal-title"></h4>
+                        </div>
+                        <div class="col-lg-6">
+                            <h4 class="modal-title">
+                                <span>Total: $</span><span id="lblMontoEstimulo"></span>
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" class="sat-tmpl-row" />
+                    <input type="hidden" class="sat-view-model-row-id" />
+                    <table class="table table-bordered sat-table"></table>
+                </div>
+                <div class="modal-footer">
+                    <button id="cancelTable" type="button" class="btn btn-primary btn-red">
+                        Cancelar
+                    </button>
+                    <button id="nuevaFila" type="button" class="btn btn-primary btn-red">
+                        Agregar
+                    </button>
+                    <button id="acceptTable" type="button" class="btn btn-primary btn-red">
+                        Terminar
+                    </button>
+                    <div style="clear: both;"></div>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+</div>
+<div id="modalErrorFilaFormularioGridEdicion" class="modal fade" style="z-index: 9999" backdrop="static" keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                Para realizar ésta acción, por favor corrija los errores de la captura del registro actual.
+            </div>
+            <div class="modal-footer">
+                <div class="notify">
+                    <button type="button" data-dismiss="modal" class="no btn btn-primary btn-red">
+                        Aceptar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="modalAvisoCompensaciones" class="modal fade" style="z-index: 9999" backdrop="static" keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- dialog body -->
+            <div class="modal-body">
+                Esta opción no está disponible para este dispositivo, utiliza un equipo de cómputo de escritorio.
+            </div>
+            <!-- dialog buttons -->
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="si btn btn-primary btn-red">
+                    Aceptar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="divDynamicModals">
+</div>
+<div id="modalErroresEnSecciones" class="modal fade" style="z-index: 9999" backdrop="static" keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <input type="hidden">
+            <!-- dialog body -->
+            <div class="modal-body">
+                Proceso concluido. Se detectaron errores en la declaración.
+
+
+            </div>
+            <!-- dialog buttons -->
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-primary btn-red">
+                    Aceptar
+
+
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="templateDlgCompensanciones">
+    <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" backdrop="static" keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <h4 class="modal-title">Compensaciones</h4>
+                        </div>
+                        <div class="col-lg-6">
+                            <h4 class="modal-title">
+                                <span>Total: $</span><span id="lblMonto"></span>
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer">
+                    <button id="btnCancelar" type="button" class="btn btn-primary btn-red">Cancelar</button>
+                    <button id="addItem" type="button" class="btn btn-primary btn-red">Agregar</button>
+                    <button id="btnTerminar" type="button" class="btn btn-primary btn-red">Terminar</button>
+                    <div style="clear: both;"></div>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+</div>
+<div id="templateRowCompensaciones" class="hide">
+    <div class="container sat-row-compensaciones">
+        <div class="row">
+            <div class="col-lg-3">
+                <label>Tipo</label>
+                <select id="tipoSelect" class="form-control sat-height-field" claveinformativa="C1302"></select>
+            </div>
+            <div class="col-lg-3">
+                <label>Periodicidad</label>
+                <select id="periodicidadSelect" class="form-control" disabled="disabled" claveinformativa="C1303"></select>
+            </div>
+            <div class="col-lg-3">
+                <label>Período</label>
+                <select id="periodoSelect" class="form-control" disabled="disabled" claveinformativa="C1304"></select>
+            </div>
+            <div class="col-lg-3">
+                <label>Ejercicio</label>
+                <select id="ejercicioSelect" class="form-control" disabled="disabled" claveinformativa="C1305"></select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-3">
+                <label>Fecha de causación (dd-mm-aaaa)</label>
+                <div class="input-append date" id="datepicker" data-date-format="dd/mm/yyyy">
+                    <input class="form-control" maxlength="12" id="txtFechaCausacion" type="text" maxlength="10" disabled="disabled" claveinformativa="C1315" />
+                    <span style="display: none;" class="add-on"></span>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <label>Número de operación</label>
+                <input id="txtNumeroOperacion" onkeyup="ESALFANUMERICO(event)" maxlength="14" class="form-control" type="text" disabled="disabled" claveinformativa="C1306" />
+            </div>
+            <div class="col-lg-3">
+                <label>Concepto</label>
+                <select id="selectConcepto" class="form-control" disabled="disabled" claveinformativa="C1307"></select>
+            </div>
+            <div class="col-lg-3">
+                <label>Saldo a aplicar</label>
+                <input maxlength="12" id="txtSaldoAplicar" class="form-control currency" type="text" disabled="disabled" onkeydown="return SoloNumerosPositivos(event)" claveinformativa="C1308" />
+                <button id="btnValidar" disabled="disabled">Continuar</button>
+                <button id="btnEliminar">Eliminar</button>
+            </div>
+        </div>
+        <div style="width: 100%; border: solid 1px lightgrey; border-width: thin"></div>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="row">
+                    <table width="400px">
+                        <tr>
+                            <td style="width: 50%;">
+                                <label>Tipo de declaración</label>
+                            </td>
+                            <td style="width: 50%;">
+                                <select id="selectTipoDeclaracion" class="form-control" disabled="disabled" claveinformativa="C1309"></select>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="row">
+                    <table width="400px">
+                        <tr>
+                            <td style="width: 50%;">
+                                <label>Monto del saldo a favor original</label>
+                            </td>
+                            <td style="width: 50%;">
+                                <input maxlength="12" id="txtSaldoFavor" class="form-control currency" type="text" disabled="disabled" onkeydown="return SoloNumerosPositivos(event)" claveinformativa="C1311" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="row">
+                    <table width="400px">
+                        <tr>
+                            <td style="width: 50%;">
+                                <label style="width: 200px;">Fecha en que se presentó la </br> declaración del saldo a favor (dd-mm-aaaa)</label>
+                            </td>
+                            <td style="width: 50%;">
+                                <div class="input-append date" id="datepicker" data-date-format="dd/mm/yyyy">
+                                    <input class="form-control" style="float: left; width: 85%; margin-rigth: 5px;" id="txtFechaDeclaracion" type="text" maxlength="10" disabled="disabled" claveinformativa="C1314">
+                                    <span style="display: none;" class="add-on"></span>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="row">
+                    <table width="400px">
+                        <tr>
+                            <td style="width: 50%;">
+                                <label>Número de operación</label>
+                            </td>
+                            <td style="width: 50%;">
+                                <input id="txtNumeroOperacion1" onkeyup="ESALFANUMERICO(event)" maxlength="14" class="form-control" type="text" disabled="disabled" claveinformativa="C1310" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="row">
+                    <table width="400px">
+                        <tr>
+                            <td style="width: 50%;">
+                                <label>Remanente histórico antes de la aplicación</label>
+                            </td>
+                            <td style="width: 50%;">
+                                <input maxlength="12" id="txtRemanenteHistorico" class="form-control currency" type="text" disabled="disabled" onkeydown="return SoloNumerosPositivos(event)" claveinformativa="C1312" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="row">
+                    <table width="400px">
+                        <tr>
+                            <td style="width: 50%;">
+                                <label>Remanente actualizado antes de la aplicación</label>
+                            </td>
+                            <td style="width: 50%;">
+                                <input maxlength="12" id="txtRemanenteActualizado" class="form-control currency" type="text" disabled="disabled" onkeydown="return SoloNumerosPositivos(event)" claveinformativa="C1313" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div style="width: 100%; border: solid 1px;"></div>
+    </div>
+</div>
+<div class="modal fade" id="dlgCancelar" style="z-index: 9999" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" backdrop="static" keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Cancelar</h4>
+            </div>
+            <div class="modal-body">¿Está seguro de cancelar todas las Compensaciones?</div>
+            <div class="modal-footer">
+                <button id="btnAceptar" type="button" class="btn btn-primary btn-red">SI</button>
+                <button type="button" class="btn btn-primary btn-red" data-dismiss="modal">NO</button>
+                <div style="clear: both;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="modalEliminarGridEdicion" class="modal fade" style="z-index: 9999" backdrop="static" keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <input type="hidden">
+            <!-- dialog body -->
+            <div class="modal-body">
+                El registro se eliminará. ¿Deseas continuar?
+            </div>
+            <!-- dialog buttons -->
+            <div class="modal-footer">
+                <button type="button" class="aceptar btn btn-primary btn-red">
+                    Aceptar
+                </button>
+                <button type="button" data-dismiss="modal" class="cancelar btn btn-primary btn-red">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="modalYesNo" class="modal fade" style="z-index: 9999">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- dialog body -->
+            <div class="modal-body">
+                Ya hay información capturada, ¿desea continuar con la operación?
+
+
+            </div>
+            <!-- dialog buttons -->
+            <div class="modal-footer">
+                <button type="button" class="si btn btn-primary btn-red">
+                    SI
+
+
+                </button>
+                <button type="button" class="no btn btn-primary btn-red">
+                    NO
+
+
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/Scripts/declaracion/3rdparty/date.js")"></script>
+    <script src="@Url.Content("~/Scripts/declaracion/3rdparty/knockout-2.3.0.js")"></script>
+    <script src="@Url.Content("~/Scripts/declaracion/3rdparty/response.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/declaracion/3rdparty/jquery.linq.js")"></script>
+    <script src="@Url.Content("~/Scripts/declaracion/3rdparty/linq.js")"></script>
+    <script src="@Url.Content("~/Scripts/declaracion/3rdparty/jsonpath.js")"></script>
+    <script src="@Url.Content("~/Scripts/declaracion/3rdparty/jquery.formatCurrency.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/declaracion/3rdparty/json2.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/declaracion/3rdparty/jquery.maskedinput.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/declaracion/3rdparty/bootstrap-datepicker.js")"></script>
+
+    @if (HttpContext.Current.IsDebuggingEnabled)
+    {
+        <script src="@Url.Content("~/Scripts/declaracion/fb.utils.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fb.xmlform.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/appui.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fb.htmlbuilder.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/compensaciones.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.controlbase.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.iconosayuda.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.cuadrocompensaciones.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.list.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.textbox.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.decimal.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.oculto.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.label.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.controlvacio.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.combobox.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.formulariogrid.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.formulariogridedicion.responsive.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.fecha.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.etiquetatexto.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fb.viewmodel.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fb.runtime.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fb.catalogs.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fb.parser.responsive.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fb.parserjson.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/public/sat.environment.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.cuadrodialogo.js")"></script>
+    }
+    else
+    {
+        <script src="@Url.Content("~/Scripts/declaracion/fb.utils.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fb.xmlform.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/appui.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fb.htmlbuilder.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/compensaciones.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.controlbase.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.iconosayuda.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.cuadrocompensaciones.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.list.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.textbox.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.decimal.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.oculto.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.label.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.controlvacio.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.combobox.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.formulariogrid.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.formulariogridedicion.responsive.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.fecha.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.etiquetatexto.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fb.viewmodel.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fb.runtime.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fb.catalogs.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fb.parser.responsive.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fb.parserjson.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/public/sat.environment.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/declaracion/fbhtmlcontrols/fb.cuadrodialogo.min.js")"></script>
+    }
+
+
+
+    <script type="text/javascript" defer="defer">
+        "use strict";
+        var xmlResultado = {};
+        var primeraLlamada = true;
+
+        $(document).ready(function () {
+            var configuracion = @Html.Raw((this.ViewBag.Info == null ? "{}" : this.ViewBag.Info));
+            var idencriptado = '@Html.Raw((this.ViewBag.idencriptado == null ? "" : this.ViewBag.idencriptado));'
+            console.log(configuracion);
+            AppDeclaracionesSAT.setConfig('configuracionDeclaracion', configuracion);
+            SAT.Environment.setSetting('isDAS', true);
+            SAT.Environment.setSetting('isPresentacion',configuracion.presentaDeclaracion);
+            SAT.Environment.setSetting('idencriptado',idencriptado);
+            AppDeclaracionesSAT.initStepThree();
+            AppDeclaracionesSAT.initProxyDivs();
+
+            Step.UI.initThree();
+
+
+
+            Service.Test.obtenerPlantilla();
+            /*Meti el evento onclick del boton a Motor al igual que remueveEstilosAsinc
+            setTimeout(function () {
+                debugger;
+                remueveEstilosAsinc();
+                //Moví este control aca para que se vindiera bien el evento del click
+                $('#btnRevisionDeclara, #revisarResponsivo').on('click', function () {
+
+                });
+            }, 5000);*/
+
+            remueveEstilos();
+
+            });
+
+        function remueveEstilos() {
+            $(".container").css('margin-right', '0px');
+            $(".container").css('margin-left', '0px');
+            $(".container").css('width', '100%');
+
+        }
+
+        /*Lo agregué al motor*/
+        //function remueveEstilosAsinc() {
+        //    //Quitamos 50% de Tabs en firstUl
+        //    $("#firstUl  li").css('width', 'auto');
+        //    $("#firstUl li a").css("border-right", "none");
+
+        //}
+
+
+    </script>
+
+}

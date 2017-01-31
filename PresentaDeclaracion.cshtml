@@ -1,0 +1,132 @@
+﻿@using Sat.DyP.Herramientas.Configuracion
+@{
+    ViewBag.Title = "PresentaDeclaracion";
+    Layout = "~/Views/Shared/_LayoutMisCuentasHorizontalPMS.cshtml";
+}
+
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "__AjaxAntiForgeryForm" }))
+{
+    @Html.AntiForgeryToken()
+}
+<br /><br />
+<div class="row">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="row row-form" >
+            <!--DIV SALIDA-->
+            <div id="htmlOutput" class="form-horizontal" style="position: relative; z-index: 1; width: 100%; height: 99%; margin-top: 15px; margin-bottom:15px;">
+            </div>          
+        </div>
+        @{
+            if (bool.Parse(ConfiguracionApp.AdaptadorCloud.RecuperarString("MuestraFirmaDeclaracion")))
+            {
+                <div id="firmado-widget-container" class="tab-pane fade in active col-xs-8 col-xs-offset-2" data-rfc="@Utileria.Instancia.DeCodificarBase64(ViewBag.RFC)">
+
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="modalEnvioDeclaracion" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Enviando declaración</h4>
+            </div>
+            <div class="modal-body">
+                <i class="icon-spinner icon-spin icon-large icon-6x"></i>
+                Favor de permanecer en la aplicación hasta obtener el acuse de recibo o respuesta del sistema.
+            </div>
+            <div class="modal-footer"></div>
+        </div>
+    </div>
+</div>
+
+<div id="modalYesNoFirmarDeclaracion" class="modal fade" style="z-index: 9999" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    Firma de la declaración.
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </h4>
+                <br />
+            </div>
+            <input type="hidden">
+            <!-- dialog body -->
+            <div class="modal-body">
+                ¿Deseas firmar tu declaración?
+            </div>
+            <!-- dialog buttons -->
+            <div class="modal-footer">
+                <button type="button" class="si btn btn-primary btn-red">SI</button>
+                <button type="button" class="no btn btn-primary btn-red">NO</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<button type="button" class="descargar-acuse btn btn-primary btn-red buttonbar" style="visibility:hidden; display:none;">Descargar</button>
+<div class="topay hide"><span>-</span></div>
+<input type="hidden" id="HDCADENAORIGINAL" />
+<div id="DVCERTIFICADO" class="sat-div-contenedores hide">-</div>
+<div id="DVFIRMA" class="sat-div-contenedores hide">-</div>
+<div id="DVNUMEROCERTIFICADO" class="sat-div-contenedores hide">-</div>
+<div id="DVOPER" class="sat-div-contenedores hide">-</div>
+<div id="DVINFOCON" class="sat-div-contenedores hide">-</div>
+<div id="DVMONTO" class="sat-div-contenedores hide">-</div>
+<div id="DVLLAVEDINAMICA" class="sat-div-contenedores hide">-</div>
+<div id="DATOSCONTRIBUYENTE" class="sat-div-contenedores hide">@ViewBag.RFC</div>
+
+@section scripts
+{
+<script type="text/javascript">
+    "use strict";
+    $(document).ready(function () {
+
+        $('.row-form').height($(window).height() - 260);
+
+        try {
+            SAT.Environment.setSetting('jsFirmado', '@ConfiguracionApp.AdaptadorCloud.RecuperarString("UrlFirmadoDeclaracion")');
+            var idDeclaracion = '@ViewBag.idDeclaracion';
+            AppDeclaracionesSAT.setConfig('rfc', Base64.decode('@ViewBag.RFC'));
+            var blnFirma = @((bool.Parse(ConfiguracionApp.AdaptadorCloud.RecuperarString("MuestraFirmaDeclaracion")) && (ViewBag.Devolucion != null && (long)ViewBag.Devolucion == 2)).ToString().ToLower())
+            AppDeclaracionesSAT.setConfig('muestraFirma', blnFirma);
+
+            Service.Test.IngresarConfiguracionDeclaracion(idDeclaracion, 0);
+            Step.UI.initSign();
+            AppDeclaracionesSAT.inicializarEventosPasoRevisionEnvio();
+        } catch (err) {
+            reloj(0);
+        }
+
+        reloj(true);
+
+    });
+
+    function ValidaSesion() {
+        try {
+            @{
+                var finSession = SAT.DeclaracionesAnuales2014.Portal.MvcApplication.SessionDuracion;
+                var alertaSessionServer = finSession - int.Parse(System.Configuration.ConfigurationManager.AppSettings["AlertaSession"]);
+            }
+            var segundos = 0;
+            var alertaSession = @alertaSessionServer;
+            var finDeSession = @finSession;
+            alertaSession = alertaSession * 60;
+            finDeSession = finDeSession * 60;
+            paginaLogin = '/';
+            console.log('Fin Session:' + finDeSession);
+        } catch (err) {
+            location.href = '/Home/LogOut';
+        }
+    }
+</script>
+
+}
+
+
+
+
+
